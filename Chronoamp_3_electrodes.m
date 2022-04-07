@@ -9,8 +9,8 @@ L=1; %longueur de l'électrode [cm]
 S=l*L; %surface active [cm²]
 
 %% Valeurs à changer 
-nbr_paliers=8; 
-tps_paliers=120; %[sec]
+nbr_paliers=5; 
+tps_paliers=130; %[sec]
 dt=1; % temps entre les points 
 nbr_pts=60; % Nbr de points pour faire moyenne
 
@@ -46,7 +46,7 @@ data=table2array(M);
 data=str2double(data);  
 
 
-%% Tri par paliers 
+%% Tri par paliers et moyenne 
 for i= 1 : nbr_paliers
     trash1=i*tps_paliers-tps_paliers+nbr_pts; %% Début intervalle pour la moyenne 
     trash2=i*tps_paliers-1; %% fin intervalle pour la moyenne ici on enlève le dernier point 
@@ -56,6 +56,9 @@ for i= 1 : nbr_paliers
     plot(data(trash1:trash2,8),data(trash1:trash2,11))
     hold on 
 end 
+Ewe=data_moy(:,10);
+Ece=data_moy(:,15);
+Ewe_ce=data_moy(:,24);
 data_moy(:,8)=round(data_moy(:,8),1); 
 data_moy(:,9)=round(data_moy(:,9),1); 
 %% Calcul de la Densité de courant 
@@ -74,19 +77,23 @@ title ('Power Density')
 
 
 %% Calcul des surtensions 
-eta_a=-data_moy(:,15)-dE0_a; 
-eta_c=data_moy(:,24)-dE0_c; 
-verif=eta_a-eta_c+data_moy(:,10); 
+eta_a=-Ece-dE0_a; 
+eta_c=Ewe_ce-dE0_c; 
+verif=eta_a-eta_c+Ewe; 
 E=dE0_c-dE0_a; 
 
 figure(4); clf
-plot(CD, eta_a,'-','LineWidth',1)
+plot(CD, eta_a,'-','LineWidth',1,'color', [0.9 0.55 0.4])
 hold on
-plot(CD,data_moy(:,15),'--','LineWidth',1)
+plot(CD,data_moy(:,15),'--','LineWidth',1,'color',[0.89 0.3 0.2]) 
 hold on 
-plot(CD,eta_c,'-','LineWidth',1)
+plot(CD,eta_c,'-','LineWidth',1,'color',[0.61 0.8 0.9])
 hold on 
-plot(CD,data_moy(:,24),'--','LineWidth',1)
+plot(CD,data_moy(:,24),'--','LineWidth',1,'color',[0.17 0.55 0.74])
 hold on 
-plot(CD,data_moy(:,9),'-','LineWidth',1)
+plot(CD,data_moy(:,9),'-','LineWidth',1,'color',[0.53 0.33 0.66])
 legend('\eta_a', 'E_a','\eta_c','E_c','Polarization curve')
+xlabel('current density [mA.cm^-2]') 
+ylabel('Potentiel [V]')
+
+save ('data_chronoamp.mat','S','CD','Ewe','Ece','Ewe_ce','eta_a', 'eta_c')
